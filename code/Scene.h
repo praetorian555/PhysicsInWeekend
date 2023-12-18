@@ -14,7 +14,8 @@
 Scene
 ====================================================
 */
-class Scene {
+class Scene
+{
 public:
 	Scene() { m_bodies.reserve( 128 ); }
 	~Scene();

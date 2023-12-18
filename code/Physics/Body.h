@@ -16,12 +16,24 @@
 Body
 ====================================================
 */
-class Body {
+class Body
+{
 public:
 	Body();
 
-	Vec3		m_position;
-	Quat		m_orientation;
+	Vec3 m_position;
+	Quat m_orientation;
+	Vec3 m_linearVelocity;
+	float m_invMass;
 
-	Shape *		m_shape;
+	Shape* m_shape;
+
+	Vec3 GetCenterOfMassWorldSpace() const;
+	// System centered at the origin of shape's geometry
+	Vec3 GetCenterOfMassModelSpace() const;
+
+	Vec3 WorldSpaceToBodySpace(const Vec3& worldPoint) const;
+	Vec3 BodySpaceToWorldSpace(const Vec3& bodyPoint) const;
+
+	void ApplyImpulseLinear(const Vec3& impulse);
 };

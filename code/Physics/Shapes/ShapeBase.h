@@ -20,6 +20,7 @@ public:
 	virtual Bounds GetBounds( const Vec3 & pos, const Quat & orient ) const = 0;
 	virtual Bounds GetBounds() const = 0;
 
+	// Relative to shape's geometry origin
 	virtual Vec3 GetCenterOfMass() const { return m_centerOfMass; }
 
 	enum shapeType_t {
