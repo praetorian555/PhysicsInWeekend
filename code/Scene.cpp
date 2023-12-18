@@ -77,7 +77,7 @@ void Scene::Update(const float dt_sec)
 	{
 		Body& body = m_bodies[i];
 		const float mass = body.m_invMass > 0.0f ? 1.0f / body.m_invMass : 0.0f;
-		const Vec3 gravityImpulse = Vec3(0, 0, -1000) * mass * dt_sec;
+		const Vec3 gravityImpulse = Vec3(0, 0, -10.0f) * mass * dt_sec;
 		body.ApplyImpulseLinear(gravityImpulse);
 	}
 
