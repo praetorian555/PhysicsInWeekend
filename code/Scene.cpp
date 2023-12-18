@@ -77,9 +77,31 @@ void Scene::Update(const float dt_sec)
 	{
 		Body& body = m_bodies[i];
 		const float mass = body.m_invMass > 0.0f ? 1.0f / body.m_invMass : 0.0f;
-		const Vec3 gravityImpulse = Vec3(0, 0, -10) * mass * dt_sec;
+		const Vec3 gravityImpulse = Vec3(0, 0, -1000) * mass * dt_sec;
 		body.ApplyImpulseLinear(gravityImpulse);
 	}
+
+	for (int i = 0; i < m_bodies.size(); i++)
+	{
+		for (int j = i + 1; j < m_bodies.size(); j++)
+		{
+			Body& bodyA = m_bodies[i];
+			Body& bodyB = m_bodies[j];
+
+			if (bodyA.m_invMass == 0.0f && bodyB.m_invMass == 0.0f)
+			{
+				continue;
+			}
+
+			contact_t contact;
+			if (Intersect(&bodyA, &bodyB, contact))
+			{
+				bodyA.m_linearVelocity.Zero();
+				bodyB.m_linearVelocity.Zero();
+			}
+		}
+	}
+
 	for (int i = 0; i < m_bodies.size(); i++)
 	{
 		m_bodies[i].m_position += m_bodies[i].m_linearVelocity * dt_sec;
