@@ -83,6 +83,7 @@ private:
 	float m_cameraRadius;
 	bool m_isPaused;
 	bool m_stepFrame;
+	bool m_stop = false;
 
 	std::vector< RenderModel > m_renderModels;
 

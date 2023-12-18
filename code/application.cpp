@@ -428,6 +428,10 @@ Application::Keyboard
 ====================================================
 */
 void Application::Keyboard( int key, int scancode, int action, int modifiers ) {
+	if (GLFW_KEY_ESCAPE == key && GLFW_RELEASE == action)
+	{
+		m_stop = true;
+	}
 	if ( GLFW_KEY_R == key && GLFW_RELEASE == action ) {
 		m_scene->Reset();
 	}
@@ -450,7 +454,7 @@ void Application::MainLoop() {
 	static float avgTime = 0.0f;
 	static float maxTime = 0.0f;
 
-	while ( !glfwWindowShouldClose( m_glfwWindow ) ) {
+	while ( !m_stop && !glfwWindowShouldClose( m_glfwWindow ) ) {
 		int time					= GetTimeMicroseconds();
 		float dt_us					= (float)time - (float)timeLastFrame;
 		if ( dt_us < 16000.0f ) {
