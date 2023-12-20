@@ -14,6 +14,7 @@ Body::Body() :
 	m_linearVelocity(0, 0, 0),
 	m_invMass(0.0f),
 	m_elasticity(1.0f),
+	m_friction(0.0f),
 	m_shape(nullptr)
 {}
 
