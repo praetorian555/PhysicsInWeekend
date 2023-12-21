@@ -79,14 +79,16 @@ void ResolveContact(const contact_t& contact)
 	}
 }
 
-int CompareContacts(const contact_t& c1, const contact_t& c2)
+int CompareContacts(const void* c1, const void* c2)
 {
+	contact_t a = *(contact_t*)c1;
+	contact_t b = *(contact_t*)c2;
 
-	if (c1.timeOfImpact < c2.timeOfImpact)
+	if (a.timeOfImpact < b.timeOfImpact)
 	{
 		return -1;
 	}
-	if (c1.timeOfImpact == c2.timeOfImpact)
+	if (a.timeOfImpact == b.timeOfImpact)
 	{
 		return 0;
 	}

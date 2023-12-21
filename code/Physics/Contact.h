@@ -21,4 +21,4 @@ struct contact_t {
 
 void ResolveContact(const contact_t& contact);
 
-int CompareContacts(const contact_t& c1, const contact_t& c2);
+int CompareContacts(const void* c1, const void* c2);
