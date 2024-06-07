@@ -122,25 +122,24 @@ void Scene::Update(const float dt_sec)
 	int numContacts = 0;
 	const int maxContacts = m_bodies.size() * m_bodies.size();
 	contact_t* contacts = (contact_t*)_malloca(sizeof(contact_t) * maxContacts);
+	assert(contacts != nullptr);
 
 	// Collect all contacts
-	for (int i = 0; i < m_bodies.size(); i++)
+	for (int i = 0; i < collisionPairs.size(); i++)
 	{
-		for (int j = i + 1; j < m_bodies.size(); j++)
+		collisionPair_t& pair = collisionPairs[i];
+		Body& bodyA = m_bodies[pair.a];
+		Body& bodyB = m_bodies[pair.b];
+
+		if (bodyA.m_invMass == 0.0f && bodyB.m_invMass == 0.0f)
 		{
-			Body& bodyA = m_bodies[i];
-			Body& bodyB = m_bodies[j];
+			continue;
+		}
 
-			if (bodyA.m_invMass == 0.0f && bodyB.m_invMass == 0.0f)
-			{
-				continue;
-			}
-
-			contact_t contact;
-			if (Intersect(&bodyA, &bodyB, dt_sec, contact))
-			{
-				contacts[numContacts++] = contact;
-			}
+		contact_t contact;
+		if (Intersect(&bodyA, &bodyB, dt_sec, contact))
+		{
+			contacts[numContacts++] = contact;
 		}
 	}
 
