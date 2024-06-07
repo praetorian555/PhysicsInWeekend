@@ -69,7 +69,7 @@ void BuildPairs(std::vector<collisionPair_t>& collisionPairs, const pseudoBody_t
 			// If we hit the end of the a element, we are done creating pairs for it
 			if (b.id == a.id)
 			{
-				continue;
+				break;
 			}
 
 			if (!b.isMin)
