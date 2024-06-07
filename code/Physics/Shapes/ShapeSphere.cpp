@@ -17,10 +17,9 @@ ShapeSphere::Support
 ====================================================
 */
 Vec3 ShapeSphere::Support(const Vec3& dir, const Vec3& pos, const Quat& orient, const float bias) const {
-	Vec3 supportPt;
-
-	// TODO: Add code
-
+	// dir assumed normalized
+	// bias allows for expansion of the shape
+	const Vec3 supportPt = pos + dir * (m_radius + bias);
 	return supportPt;
 }
 
