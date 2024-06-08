@@ -42,11 +42,20 @@ ShapeBox::Support
 ====================================================
 */
 Vec3 ShapeBox::Support( const Vec3 & dir, const Vec3 & pos, const Quat & orient, const float bias ) const {
-	Vec3 supportPt;
-	
-	// TODO: Add code
-
-	return supportPt;
+	// dir should be normalized
+	Vec3 support_pt = orient.RotatePoint(m_points[0]) + pos;
+	float max_dist = support_pt.Dot(dir);
+	for (int i = 1; i < m_points.size(); i++)
+	{
+		Vec3 candidate = orient.RotatePoint(m_points[i]) + pos;
+		float candidate_dist = candidate.Dot(dir);
+		if (candidate_dist > max_dist)
+		{
+			support_pt = m_points[i];
+			max_dist = candidate_dist;
+		}
+	}
+	return support_pt + dir * bias;
 }
 
 /*
@@ -83,10 +92,22 @@ ShapeBox::GetBounds
 ====================================================
 */
 Bounds ShapeBox::GetBounds( const Vec3 & pos, const Quat & orient ) const {
-	Bounds bounds;
-	
-	// TODO: Add code
+	Vec3 corners[8];
+	corners[0] = Vec3(m_bounds.mins.x, m_bounds.mins.y, m_bounds.mins.z);
+	corners[1] = Vec3(m_bounds.maxs.x, m_bounds.mins.y, m_bounds.mins.z);
+	corners[2] = Vec3(m_bounds.mins.x, m_bounds.maxs.y, m_bounds.mins.z);
+	corners[3] = Vec3(m_bounds.mins.x, m_bounds.mins.y, m_bounds.maxs.z);
+	corners[4] = Vec3(m_bounds.maxs.x, m_bounds.maxs.y, m_bounds.maxs.z);
+	corners[5] = Vec3(m_bounds.mins.x, m_bounds.maxs.y, m_bounds.maxs.z);
+	corners[6] = Vec3(m_bounds.maxs.x, m_bounds.mins.y, m_bounds.maxs.z);
+	corners[7] = Vec3(m_bounds.maxs.x, m_bounds.maxs.y, m_bounds.mins.z);
 
+	Bounds bounds;
+	for (int i = 0; i < 8; i++)
+	{
+		corners[i] = orient.RotatePoint(corners[i]) + pos;
+		bounds.Expand(corners[i]);
+	}
 	return bounds;
 }
 
@@ -96,9 +117,16 @@ ShapeBox::FastestLinearSpeed
 ====================================================
 */
 float ShapeBox::FastestLinearSpeed( const Vec3 & angularVelocity, const Vec3 & dir ) const {
-	float maxSpeed = 0.0f;
-	
-	// TODO: Add code
-
-	return maxSpeed;
+	float max_speed = 0.0f;
+	for (int i = 0; i < m_points.size(); i++)
+	{
+		const Vec3 r = m_points[i] - m_centerOfMass;
+		const Vec3 linearVelocity = angularVelocity.Cross(r);
+		const float speed = dir.Dot(linearVelocity);
+		if (speed > max_speed)
+		{
+			max_speed = speed;
+		}
+	}
+	return max_speed;
 }
