@@ -17,6 +17,61 @@ Scene
 ========================================================================================================
 */
 
+void AddStandardSandBox(std::vector<Body>& bodies)
+{
+	Body body;
+
+	body.m_position = Vec3(0, 0, 0);
+	body.m_orientation = Quat(0, 0, 0, 1);
+	body.m_linearVelocity.Zero();
+	body.m_angularVelocity.Zero();
+	body.m_invMass = 0.0f;
+	body.m_elasticity = 0.5f;
+	body.m_friction = 0.5f;
+	body.m_shape = new ShapeBox(g_boxGround, sizeof(g_boxGround) / sizeof(Vec3));
+	bodies.push_back(body);
+
+	body.m_position = Vec3(50, 0, 0);
+	body.m_orientation = Quat(0, 0, 0, 1);
+	body.m_linearVelocity.Zero();
+	body.m_angularVelocity.Zero();
+	body.m_invMass = 0.0f;
+	body.m_elasticity = 0.5f;
+	body.m_friction = 0.0f;
+	body.m_shape = new ShapeBox(g_boxWall0, sizeof(g_boxWall0) / sizeof(Vec3));
+	bodies.push_back(body);
+
+	body.m_position = Vec3(-50, 0, 0);
+	body.m_orientation = Quat(0, 0, 0, 1);
+	body.m_linearVelocity.Zero();
+	body.m_angularVelocity.Zero();
+	body.m_invMass = 0.0f;
+	body.m_elasticity = 0.5f;
+	body.m_friction = 0.0f;
+	body.m_shape = new ShapeBox(g_boxWall0, sizeof(g_boxWall0) / sizeof(Vec3));
+	bodies.push_back(body);
+
+	body.m_position = Vec3(0, 25, 0);
+	body.m_orientation = Quat(0, 0, 0, 1);
+	body.m_linearVelocity.Zero();
+	body.m_angularVelocity.Zero();
+	body.m_invMass = 0.0f;
+	body.m_elasticity = 0.5f;
+	body.m_friction = 0.0f;
+	body.m_shape = new ShapeBox(g_boxWall1, sizeof(g_boxWall1) / sizeof(Vec3));
+	bodies.push_back(body);
+
+	body.m_position = Vec3(0, -25, 0);
+	body.m_orientation = Quat(0, 0, 0, 1);
+	body.m_linearVelocity.Zero();
+	body.m_angularVelocity.Zero();
+	body.m_invMass = 0.0f;
+	body.m_elasticity = 0.5f;
+	body.m_friction = 0.0f;
+	body.m_shape = new ShapeBox(g_boxWall1, sizeof(g_boxWall1) / sizeof(Vec3));
+	bodies.push_back(body);
+}
+
 /*
 ====================================================
 Scene::~Scene
@@ -55,6 +110,7 @@ void Scene::Initialize()
 {
 	Body body;
 
+#if 0
 	// Dynamic bodies
 	for (int x = 0; x < 6; x++)
 	{
@@ -92,6 +148,20 @@ void Scene::Initialize()
 			m_bodies.push_back(body);
 		}
 	}
+#else
+
+	body.m_position = Vec3(0, 0, 10);
+	body.m_orientation = Quat(0, 0, 0, 1);
+	body.m_linearVelocity.Zero();
+	body.m_invMass = 1.0f;
+	body.m_elasticity = 0.5f;
+	body.m_friction = 0.5f;
+	body.m_shape = new ShapeConvex(g_diamond, sizeof(g_diamond) / sizeof(Vec3));
+	m_bodies.push_back(body);
+
+	AddStandardSandBox(m_bodies);
+
+#endif
 }
 
 /*
