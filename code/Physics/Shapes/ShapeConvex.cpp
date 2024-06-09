@@ -150,12 +150,12 @@ void RemoveInternalPoints(const std::vector<Vec3>& hull_points, const std::vecto
 				is_external = true;
 				break;
 			}
+		}
 
-			if (!is_external)
-			{
-				check_points.erase(check_points.begin() + i);
-				i--;
-			}
+		if (!is_external)
+		{
+			check_points.erase(check_points.begin() + i);
+			i--;
 		}
 	}
 
@@ -359,13 +359,138 @@ void BuildConvexHull(const std::vector< Vec3 >& verts, std::vector< Vec3 >& hull
 	ExpandConvexHull(hullPts, hullTris, verts);
 }
 
+bool IsExternal(const std::vector<Vec3>& points, const std::vector<tri_t>& triangles, const Vec3& point)
+{
+	bool is_external = false;
+	for (int i = 0; i < triangles.size(); i++)
+	{
+		const tri_t& triangle = triangles[i];
+		const Vec3& a = points[triangle.a];
+		const Vec3& b = points[triangle.b];
+		const Vec3& c = points[triangle.c];
+
+		const float dist = DistanceFromTriangle(a, b, c, point);
+		if (dist > 0.0f)
+		{
+			is_external = true;
+			break;
+		}
+	}
+	return is_external;
+}
+
+Vec3 CalculateCenterOfMass(const std::vector<Vec3>& points, const std::vector<tri_t>& triangles)
+{
+	constexpr int k_num_samples = 100;
+
+	Bounds bounds;
+	bounds.Expand(points.data(), points.size());
+
+	Vec3 center_of_mass(0.0f);
+	const float dx = bounds.WidthX() / k_num_samples;
+	const float dy = bounds.WidthY() / k_num_samples;
+	const float dz = bounds.WidthZ() / k_num_samples;
+
+	int sample_count = 0;
+	for (float x = bounds.mins.x; x < bounds.maxs.x; x += dx)
+	{
+		for (float y = bounds.mins.y; y < bounds.maxs.y; y += dy)
+		{
+			for (float z = bounds.mins.z; z < bounds.maxs.z; z += dz)
+			{
+				Vec3 point(x, y, z);
+				if (IsExternal(points, triangles, point))
+				{
+					continue;
+				}
+
+				center_of_mass += point;
+				sample_count++;
+			}
+		}
+	}
+
+	center_of_mass /= static_cast<float>(sample_count);
+	return center_of_mass;
+}
+
+Mat3 CalculateInertiaTensor(const std::vector<Vec3>& points, const std::vector<tri_t>& triangles, const Vec3& center_of_mass)
+{
+	constexpr int k_num_samples = 100;
+
+	Bounds bounds;
+	bounds.Expand(points.data(), points.size());
+
+	const float dx = bounds.WidthX() / k_num_samples;
+	const float dy = bounds.WidthY() / k_num_samples;
+	const float dz = bounds.WidthZ() / k_num_samples;
+
+	Mat3 tensor;
+	tensor.Zero();
+
+	int sample_count = 0;
+	for (float x = bounds.mins.x; x < bounds.maxs.x; x += dx)
+	{
+		for (float y = bounds.mins.y; y < bounds.maxs.y; y += dy)
+		{
+			for (float z = bounds.mins.z; z < bounds.maxs.z; z += dz)
+			{
+				Vec3 point(x, y, z);
+				if (IsExternal(points, triangles, point))
+				{
+					continue;
+				}
+
+				// Get the point relative to the center of mass
+				point -= center_of_mass;
+
+				tensor.rows[0][0] += point.y * point.y + point.z * point.z;
+				tensor.rows[1][1] += point.z * point.z + point.x * point.x;
+				tensor.rows[2][2] += point.x * point.x + point.y * point.y;
+
+				tensor.rows[0][1] += -1.0f * point.x * point.y;
+				tensor.rows[0][2] += -1.0f * point.x * point.z;
+				tensor.rows[1][2] += -1.0f * point.y * point.z;
+
+				tensor.rows[1][0] += -1.0f * point.x * point.y;
+				tensor.rows[2][0] += -1.0f * point.x * point.z;
+				tensor.rows[2][1] += -1.0f * point.y * point.z;
+
+				sample_count++;
+			}
+		}
+	}
+
+	tensor *= 1.0f / static_cast<float>(sample_count);
+	return tensor;
+}
+
 /*
 ====================================================
 ShapeConvex::Build
 ====================================================
 */
 void ShapeConvex::Build(const Vec3* pts, const int num) {
-	// TODO: Add code
+	m_points.clear();
+	m_points.reserve(num);
+	for (int i = 0; i < num; i++)
+	{
+		m_points.push_back(pts[i]);
+	}
+
+	// Expand into convex hull
+	std::vector<Vec3> hull_points;
+	std::vector<tri_t> hull_triangles;
+	BuildConvexHull(m_points, hull_points, hull_triangles);
+	m_points = hull_points;
+
+	// Expand the bounds
+	m_bounds.Clear();
+	m_bounds.Expand(m_points.data(), m_points.size());
+
+	m_centerOfMass = CalculateCenterOfMass(hull_points, hull_triangles);
+
+	m_inertiaTensor = CalculateInertiaTensor(hull_points, hull_triangles, m_centerOfMass);
 }
 
 /*
